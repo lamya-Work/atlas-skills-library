@@ -1,0 +1,9 @@
+{
+  "name": "energy-audit",
+  "version": "0.1.0",
+  "description": "Bi-weekly energy audit. Reads the trailing 14 days from any combination of calendar, task tool, meeting transcripts, and selected Slack channels. Identifies 1-2 high-confidence automation candidates and produces complete Atlas Automation Plans for each.",
+  "author": {
+    "name": "Atlas Assistants"
+  },
+  "tags": ["executive", "energy-audit", "automation", "bi-weekly", "calendar", "tasks", "meetings", "slack", "delegation", "productivity"]
+}

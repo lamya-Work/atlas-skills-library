@@ -1,0 +1,3 @@
+# Filled-in exec energy profiles contain client data — keep local, not in the repo.
+# Only the template (exec-energy-profile.template.md) should be committed.
+exec-energy-profile.md
