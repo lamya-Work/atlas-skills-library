@@ -48,12 +48,12 @@ The plugin's skills depend on these capabilities. Each is named abstractly — w
 /plugin install ideal-week-ops@atlas
 ```
 
-**After installing, run `setup` first.** The `setup` skill detects what's already wired in your AI host, walks you through Composio install if needed, captures your notification channel + recipient, and writes a local config file. Then `extract-ideal-week` and `scan-ideal-week` are ready to use.
+**After installing, run `setup` first.** The `setup` skill detects what's already wired in your AI host, walks you through Composio install if needed, captures your notification channel + recipient, writes a local config file, and chains directly into `extract-ideal-week` to capture how your week should actually run. Once both finish, `scan-ideal-week` is ready.
 
 ## First-run setup
 
 1. **Run `setup`.** Detection-first onboarding. Walks you through Composio install (or detects your existing MCPs), picks calendar + notification tools, captures channel + recipient, surfaces the self-notification trap warning if you pick Slack to your own handle, writes `.claude/ideal-week-ops.local.md`. Resumable mid-flow.
-2. **Run `extract-ideal-week`.** Captures how your week should run (rhythms, deep-work blocks, protected time, VIP overrides, zone of genius). Synthesizes a structured ideal-week document and confirms with you before saving.
+2. **`setup` chains into `extract-ideal-week` automatically.** After wiring captures, the flow continues into the extraction interview without a separate trigger phrase. Captures how your week should run (rhythms, deep-work blocks, protected time, VIP overrides, zone of genius), synthesizes a structured ideal-week document, and confirms with you before saving. Say "pause" during the hand-off if you'd rather skip extraction for now — you can run it later with "extract ideal week".
 3. **(Optional) Wire a recurring trigger.** If you want twice-daily automatic scans, register a recurring task in your runtime (Cowork Scheduled tasks, Claude Code `/schedule`, GitHub Actions cron, etc.) that invokes `scan-ideal-week`. Recommended cadence: weekdays 5pm (flags tomorrow) + weekdays 7am (flags today). Without this, invoke `scan-ideal-week` manually any time.
 4. **First scan.** Run `scan-ideal-week` once manually to confirm the wiring works end-to-end and the output looks right before relying on the schedule.
 

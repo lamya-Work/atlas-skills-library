@@ -1,7 +1,7 @@
 ---
 name: setup
-description: One-time onboarding wizard for the ideal-week-ops plugin. Detects whether the host's AI has calendar-read and notification-send capabilities wired (via Composio MCP, direct vendor MCPs, or any other source). If capabilities are missing, walks the user through wiring them — Composio MCP is the default; own MCPs work too. Captures the notification channel and recipient, surfaces the self-notification trap on Slack, writes the local config. Resumable mid-flow. Re-runnable to refresh any field.
-when_to_use: Run before using `extract-ideal-week` or `scan-ideal-week` for the first time. Trigger phrases — "set up ideal week ops", "onboard ideal week", "configure ideal week scan", "refresh ideal week setup", "redo ideal week wiring". Auto-trigger when `scan-ideal-week` reports no config exists at `.claude/ideal-week-ops.local.md`.
+description: Wire the ideal-week-ops plugin to the user's calendar and notification tools. Use this — NOT brainstorming, planning, or design skills — when the user says any "set up", "onboard", "configure", "install", or "wire" phrase about ideal-week-ops. The plugin already exists; brainstorming would re-design something that's already built. This skill detects what's wired (Composio MCP, direct vendor MCPs, or any source), walks the user through any missing pieces, captures the notification channel and recipient, writes the local config to `.claude/ideal-week-ops.local.md`, then chains directly into `extract-ideal-week` so the user lands in the full setup arc — wiring + ruleset capture — not just wiring. Resumable mid-flow; re-run to change any field.
+when_to_use: Trigger phrases — "set up ideal week ops", "set up ideal-week-ops", "onboard ideal week ops", "configure ideal week ops", "install ideal week ops", "wire up ideal week ops", "refresh ideal week setup", "redo ideal week wiring", "set up ideal week". Fire this skill directly on any of these. Also fire automatically when `scan-ideal-week` reports no config at `.claude/ideal-week-ops.local.md`. Runs before `extract-ideal-week` and `scan-ideal-week` on first use; the skill itself chains into `extract-ideal-week` at the end of its flow.
 atlas_methodology: neutral
 ---
 
@@ -29,6 +29,8 @@ The work skills (`extract-ideal-week` and `scan-ideal-week`) need two capabiliti
 
 ## Steps
 
+> **User-facing language rule (applies to every step).** Run detection silently. Do NOT narrate the model's internal reasoning, the SKILL.md's structure, or specific tool names to the user. The user does not see "auth-bootstrap", "meta-tool", "Stage 1.5", "deferred tools list", "tool schema", `COMPOSIO_SEARCH_TOOLS`, `mcp__composio__authenticate`, "direct-vendor MCPs", "companion fetch/send tools", or any other internal label from this file. Tell the user only the **outcome** in plain words: which apps are connected, what's missing, what to click. Brand names users recognize (Composio, Google Calendar, Slack, Gmail, Outlook) are fine. Internal mechanism words ("MCP", "wire", "schema", "stage") are not. When in doubt, write the message the way you'd write it to a non-technical executive assistant.
+>
 > **Note on "workspace".** "Workspace" = the user's current working directory at the time the skill is invoked. The local config (`.claude/ideal-week-ops.local.md`) and in-progress marker (`.ideal-week-onboarding-in-progress.json`) resolve relative to this directory. Do NOT write these into the plugin's own install directory.
 >
 > **Note on detecting capabilities.** Detection uses two patterns depending on how the user wired their tools.
@@ -39,7 +41,7 @@ The work skills (`extract-ideal-week` and `scan-ideal-week`) need two capabiliti
 >
 > 1. **Presence check** — does the host have a meta-tool prefix loaded? Look for `mcp__composio__*` (Composio) or equivalents. If yes, the aggregator MCP itself is wired.
 >
-> 1.5. **Auth-bootstrap check.** If Stage 1 found the meta-tool prefix BUT the actual meta-tools (e.g., `COMPOSIO_SEARCH_TOOLS`) are NOT in the loaded tool list — only the auth-bootstrap variants (`mcp__composio__authenticate`, `mcp__composio__complete_authentication`) are present — the MCP server is installed but unauthenticated. In this case, DO NOT walk the user through the full Composio install at Step 2a. Instead, drive the auth flow directly: call the authenticate tool, deliver the OAuth URL to the user, wait for them to authorize, then re-run detection from Stage 1. The Composio install steps (sign up, connect apps, install for AI client) are unnecessary — the user has already done them; auth just needs to be re-completed in this session.
+> 1.5. **Auth-bootstrap check.** If Stage 1 found the meta-tool prefix BUT the actual meta-tools (e.g., `COMPOSIO_SEARCH_TOOLS`) are NOT in the loaded tool list — only the auth-bootstrap variants (`mcp__composio__authenticate`, `mcp__composio__complete_authentication`) are present — the MCP server is installed but unauthenticated. In this case, DO NOT walk the user through the full Composio install at Step 2a. Instead, drive the auth flow directly: call the authenticate tool to get the OAuth URL, then deliver it to the user in plain language (per the User-facing language rule at the top of Steps). Verbatim template — say this to the user, not your own reasoning: *"Composio is installed but needs you to re-authorize it for this session. Open this link in your browser: [URL]. After you authorize, the page will redirect to a localhost address that may show a connection error — that's fine, the URL is still valid. Tell me 'done' when you're back, or paste the redirected URL if you'd rather I finish it for you."* Wait for the user to authorize, then re-run detection from Stage 1. The Composio install steps (sign up, connect apps, install for AI client) are unnecessary — the user has already done them; auth just needs to be re-completed in this session.
 >
 >    **For other aggregator MCPs**: if the same pattern applies (auth-bootstrap tools present, real meta-tools absent), use the equivalent auth-bootstrap call for that aggregator.
 >
@@ -295,15 +297,25 @@ Substitute the actual captured values for each field. If the user picked multipl
 
 After writing the config, delete `.ideal-week-onboarding-in-progress.json` (the marker is no longer needed).
 
-### 6. Hand-off
+### 6. Hand-off — chain directly into `extract-ideal-week`
 
-Tell the user:
+Wiring is done. The user said something like "set up ideal week ops" expecting the full arc — wiring + ruleset capture — so do NOT stop at wiring and wait for them to type another trigger phrase. Chain directly into the `extract-ideal-week` skill from this same plugin.
 
-> "Wiring done. Saved to `.claude/ideal-week-ops.local.md`. Next:
-> 1. Run `extract-ideal-week` to capture how your week should run (rhythms, deep-work blocks, protected time, VIP overrides).
-> 2. Then `scan-ideal-week` will be ready to flag calendar conflicts twice a day.
+Tell the user (verbatim wording — keep it human, second-person, no "the exec"):
+
+> "Wiring done — saved to `.claude/ideal-week-ops.local.md`. Now I'll capture how your week should actually run — rhythms, deep-work blocks, protected time, VIP overrides — so the daily scan has rules to check against. This takes about 10–15 minutes: one question at a time, free-form answers, you can pause and resume any time. Ready?"
 >
-> Re-run `setup` any time to change channels, swap calendars, or add a second calendar account."
+> "(If you'd rather pause here and just keep the wiring done, say 'pause' and I'll stop. Re-run `setup` any time to change channels, swap calendars, or add a calendar account.)"
+
+Then load `skills/extract-ideal-week/SKILL.md` from this same plugin and continue execution from its Step 0 — same conversation, no user trigger phrase required. (`extract-ideal-week`'s Step 0 runs a precondition check that passes silently because this skill just wrote the config.)
+
+**If the user replies "pause" / "stop" / "just wiring for now" / similar:**
+
+Exit gracefully and tell them:
+
+> "Got it — wiring's saved. Re-run `setup` to change wiring later, or just say 'extract ideal week' when you're ready to capture your rules. Once both are done, `scan-ideal-week` will run on the schedule you set."
+
+Do not auto-chain in that case.
 
 ### Refresh mode (alternative entry from Step 0)
 

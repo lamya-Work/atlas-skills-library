@@ -1,7 +1,7 @@
 ---
 name: extract-ideal-week
-description: Onboards an executive's ideal week into a structured, enforceable document. Explains the concept, checks if one is already documented, parses it if so, otherwise interviews the exec with Atlas's standard 10 + 3 questions (week rhythm + zone of genius), synthesizes the answers into a canonical format with rule buckets and protected blocks, and confirms with the exec before saving. Resumable mid-flow.
-when_to_use: Run before any other ideal-week-ops skill. Trigger phrases — "set up ideal week", "extract ideal week", "onboard ideal week", "document the exec's calendar rules", "build the ideal week ruleset", "we need an ideal week for [exec]". Also trigger automatically when scan-ideal-week reports that no ideal week document exists at the configured path.
+description: Capture the user's ideal-week ruleset — workday rhythm, protected blocks, ALWAYS / NEVER / PREFER / FLEXIBLE rules, VIP overrides, zone of genius — into a single canonical document at `client-profile/ideal-week.md`. Use this — NOT brainstorming, planning, or design skills — when the user wants their ideal week extracted, documented, captured, or interviewed. Atlas already has a battle-tested 10+3 question set; brainstorming would replace it with generic discovery questions. This skill either parses an existing ideal-week document the user already has, or runs the 10+3 interview from scratch (one question at a time, paraphrase-back, anyone-can-answer, resumable mid-flow). The output is what `scan-ideal-week` reads to flag calendar conflicts.
+when_to_use: Trigger phrases — "extract ideal week", "extract the ideal week", "document the ideal week", "document the exec's calendar rules", "capture the ideal week", "interview for ideal week", "build the ideal week ruleset", "we need an ideal week for [exec]". Fire this skill directly on any of these. Also fire automatically when (a) the `setup` skill chains into extraction at the end of its flow, or (b) `scan-ideal-week` reports no ideal-week document at the configured `ideal_week_path`. Note — "set up ideal week ops" is intentionally NOT a trigger here; that phrase belongs to the `setup` skill, which then chains into this one. Run after `setup` so the workspace config exists, or accept the soft-block at Step 0 and proceed without wiring.
 atlas_methodology: opinionated
 ---
 
@@ -40,7 +40,7 @@ Before the interview, check whether `.claude/ideal-week-ops.local.md` exists in 
 >
 > Which would you prefer?"
 
-If user picks setup first → tell them to invoke `setup`, then return here.
+If user picks setup first → tell them to run `setup`, then return here.
 If user picks proceed anyway → continue to the interview. The extraction works without wiring; only the scan needs it.
 
 ### 1. Phase detection (always first)
