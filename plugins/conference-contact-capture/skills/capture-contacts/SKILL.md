@@ -37,6 +37,8 @@ You return from a conference, networking event, or any other meeting with notes 
 
 ## Phases
 
+> **Note on paths.** All `client-profile/...` paths in this skill resolve relative to the **workspace** — the user's current working directory at the time the skill is invoked (i.e. where the host runtime was started). Do NOT resolve them against the plugin's install directory; that location is read-only and shared across users. If a `client-profile/...` file appears missing, confirm the lookup is happening in the workspace before reporting setup as incomplete.
+
 ### Phase 0 — Pre-flight
 
 Verify in order:
@@ -67,13 +69,29 @@ Show the parsed list once — briefly, no "look right?" prompt — and proceed t
 
 For each contact, invoke the embedded `linkedin-research` skill via subprocess: `python <plugin-root>/skills/linkedin-research/linkedin_scraper.py scrape "<contact name>" [--company "<hint>"]`.
 
-**Always pass a `--company` hint when you have one.** The scraper picks the first search result by default, which is frequently wrong when the name is common — e.g. a common name like "Sarah Chen" can return 10+ candidates, and the unhinted scrape picks the first one, which is often the dominant search-result hit (e.g. someone at a large company sharing the name) rather than the actual contact (often someone in a niche role at a smaller company). Sources for the hint, in priority order:
+**Hard cap: maximum 2 scrape attempts per contact.** Every invocation of `linkedin_scraper.py scrape` for a given contact counts toward the cap, regardless of whether the variation is a name form, a company hint, a role hint, or any combination. After the second attempt, do NOT scrape this contact again — route to the "Person not findable" failure-mode bullet below (continue with brain-dump notes only, flag in Phase 7).
+
+**Attempt 1 — best initial hint.** Always pass a `--company` hint when you have one. The scraper picks the first search result by default, which is frequently wrong when the name is common — e.g. a common name like "Sarah Chen" can return 10+ candidates, and the unhinted scrape picks the first one, which is often the dominant search-result hit (e.g. someone at a large company sharing the name) rather than the actual contact (often someone in a niche role at a smaller company). Sources for the hint, in priority order:
 
 1. Company name (or partial) from the brain dump — even fragments like "ethical something" work; pass `--company "Ethical"`.
 2. Industry / role keyword from the dump (e.g. "client success consultant", "founder of an ML startup").
 3. Any URL or other anchor mentioned in the dump.
 
-If none of those exist, scrape on name alone, then verify post-hoc against the dump: if the returned dossier's company / role contradicts the user's notes, re-scrape with whatever signal IS in the dump. Each re-scrape consumes one of the daily 25 LinkedIn lookups — note the cost in Phase 7 if it happened.
+If none of those exist, scrape on name alone for attempt 1.
+
+**Attempt 2 (only if attempt 1 returned a dossier that contradicts the dump, OR returned no usable match at all).** Pick the single best alternative signal and re-scrape ONCE. Examples:
+
+- Attempt 1 used `--company "Acme"` → attempt 2 drops the company hint and uses a role keyword instead, OR uses an alternate name form (initials, maiden name, etc.) if the dump suggests one.
+- Attempt 1 used name only → attempt 2 adds whatever weak hint exists (industry, role, URL fragment).
+
+Do NOT loop through multiple hint combinations. Pick one alternative and commit.
+
+**After attempts 1+2 (or after attempt 1 if it succeeded):**
+
+- Dossier matches the dump → continue to "Cleanup after the subprocess returns" below.
+- Both attempts contradicted the dump, OR both errored with "no LinkedIn match" → route to the "Person not findable" failure-mode bullet below. Do NOT scrape a third time.
+
+If a re-scrape (attempt 2) was used, note the cost in Phase 7 — it consumed 1 of the daily 25 LinkedIn lookups.
 
 **Cleanup after the subprocess returns.** The script writes a **raw dossier** to `<output_dir>/<name-slug>-<timestamp>-raw.md` — messy, includes sidebar suggestions, video-player UI strings, footer chrome, and repeated author names within posts. Because we're calling the CLI directly (not loading the LinkedIn skill's body), the LinkedIn skill's own cleanup step (4c in `linkedin-research/SKILL.md`) doesn't run. Produce the cleaned file here so the output stays consistent with standalone LinkedIn-skill use:
 
