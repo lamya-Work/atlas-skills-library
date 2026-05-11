@@ -213,11 +213,19 @@ Confirmation (after user confirms or picks a path):
 
 Used at: `SKILL.md` final step. This is the final message in the setup skill. After delivering it, the setup skill is done — do not proceed into the audit run unless the user explicitly asks.
 
-> "Setup done. Saved to `.claude/energy-audit.local.md`.
+> "Setup done. Saved to `client-profile/energy-audit.local.md`.
 >
 > The audit is designed to run on a bi-weekly cadence — if you want it recurring, schedule it in whichever AI tool you're using (Cowork's scheduler, Claude Code's `/schedule`, GitHub Actions, OS cron — all work). If you'd rather just trigger it manually, that's fine — say *'run my energy audit'* any time.
 >
 > Next, run `extract-energy-profile` to capture how you work — Zone of Genius, drains, recurring patterns, quarterly priorities. The audit reads both files when it runs."
+
+---
+
+### Legacy-path migration
+
+Used at: `SKILL.md` Step 0, only when an existing `.claude/energy-audit.local.md` is detected and no new-path config exists. Surfaced once, after the file copy completes, before continuing into the three detection checks.
+
+> "Migrated your wiring config from `.claude/energy-audit.local.md` to `client-profile/energy-audit.local.md`. You can delete the old file once you've confirmed things work."
 
 ---
 
