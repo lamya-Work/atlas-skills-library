@@ -31,6 +31,8 @@ __pycache__/
 **/client-profile/label-plan.json
 **/client-profile/energy-audit.local.md
 **/client-profile/energy-audit.run-log.jsonl
+**/client-profile/ideal-week-ops.local.md
+**/client-profile/ideal-week-ops.scan-log.jsonl
 **/logs/
 
 # meeting-performance-analyzer runtime state
