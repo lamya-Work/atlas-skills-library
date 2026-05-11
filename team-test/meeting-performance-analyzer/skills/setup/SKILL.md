@@ -19,7 +19,7 @@ The audit's weekly cadence is encoded in its own design (7-day cap window). This
 
 - **Existing config** (optional) — if `<workspace>/client-profile/meeting-performance-analyzer.local.md` exists, the skill enters refresh mode automatically.
 - **Host's loaded tool list** — required. Skill reads what tools the host has connected and uses that to detect capability presence.
-- **In-progress marker** (optional) — `.meeting-performance-analyzer-onboarding-in-progress.json` in the workspace, if a previous run was interrupted.
+- **In-progress marker** (optional) — `<workspace>/.meeting-performance-analyzer-onboarding-in-progress.json`, if a previous run was interrupted.
 - **Conversational interview** — questions asked one at a time, paraphrased back for confirmation.
 
 ## Required capabilities
@@ -191,7 +191,7 @@ If the probe returns no matching actions for either query, surface this to the u
 
 If the probe succeeds, capture nothing — the audit re-runs the same discovery at runtime. The probe is just a setup-time sanity check to fail fast.
 
-Save running state to `.meeting-performance-analyzer-onboarding-in-progress.json`.
+Save running state to `<workspace>/.meeting-performance-analyzer-onboarding-in-progress.json`.
 
 ---
 
@@ -244,7 +244,7 @@ Capture under `output_folder`. Accept the default if the user says "default" / "
 
 If the user provides an absolute path (e.g., for a cross-project library), accept it as-is. Note in the hand-off: chat-link previews on the audit-complete email may not be clickable if the path is outside the current workspace.
 
-Save running state to `.meeting-performance-analyzer-onboarding-in-progress.json`.
+Save running state to `<workspace>/.meeting-performance-analyzer-onboarding-in-progress.json`.
 
 ---
 
@@ -277,7 +277,7 @@ dry_run: false
 ---
 ````
 
-Substitute the actual captured values for each field. After writing the config, delete `.meeting-performance-analyzer-onboarding-in-progress.json` (the marker is no longer needed).
+Substitute the actual captured values for each field. After writing the config, delete `<workspace>/.meeting-performance-analyzer-onboarding-in-progress.json` (the marker is no longer needed).
 
 ---
 
