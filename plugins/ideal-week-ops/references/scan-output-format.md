@@ -89,7 +89,7 @@ Ideal-week scan — tomorrow (Mon Apr 27) — 2 blocks, 1 warning — scanned 20
 - Marketing weekly · 10:00-10:30am · No prep block in front of 30-min meeting
   → Add 15-min prep at 9:45am (currently free)
 
-[Scan log: .claude/ideal-week-ops.scan-log.jsonl]
+[Scan log: client-profile/ideal-week-ops.scan-log.jsonl]
 ```
 
 ## Worked example — clean window
@@ -99,7 +99,7 @@ Ideal-week scan — tomorrow (Mon Apr 27) — all clean ✅ — scanned 2026-04-
 
 ## Mon Apr 27: clean ✅
 
-[Scan log: .claude/ideal-week-ops.scan-log.jsonl]
+[Scan log: client-profile/ideal-week-ops.scan-log.jsonl]
 ```
 
 ## Channel-specific rendering notes
