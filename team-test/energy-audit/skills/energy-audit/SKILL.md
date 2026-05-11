@@ -18,8 +18,8 @@ If the previous successful run was less than 14 days ago and the invocation is m
 ## Inputs
 
 - **Energy profile** at `<workspace>/client-profile/exec-energy-profile.md` (written by `extract-energy-profile`).
-- **Local config** at `<workspace>/.claude/energy-audit.local.md` (written by `setup`).
-- **Run log** at `<workspace>/.claude/energy-audit.run-log.jsonl` — JSON Lines, one entry per audit run. Used for overlap detection.
+- **Local config** at `<workspace>/client-profile/energy-audit.local.md` (written by `setup`).
+- **Run log** at `<workspace>/client-profile/energy-audit.run-log.jsonl` — JSON Lines, one entry per audit run. Used for overlap detection. Created on first run if missing.
 - **Run date** = today, in the executive's local timezone.
 - **Skill argument** (optional) — `--dry-run` or matching config flag suppresses the notification send and the file write side effects.
 
@@ -39,7 +39,7 @@ If the previous successful run was less than 14 days ago and the invocation is m
 
 ## Steps
 
-> **Note on "workspace".** "Workspace" = the user's current working directory at the time the skill is invoked. The energy profile (`client-profile/exec-energy-profile.md`), the local config (`.claude/energy-audit.local.md`), the run log (`.claude/energy-audit.run-log.jsonl`), and the output report folder (per config) all resolve relative to this directory. Do NOT read or write these from the plugin's own install directory. Plugin-internal references (`references/atlas-energy-audit-methodology.md`, `references/sub-agent-extraction-prompt.md`, the build-automation-plan skill) use `../../` from this skill folder to mean plugin root.
+> **Note on "workspace".** "Workspace" = the user's current working directory at the time the skill is invoked. The energy profile (`client-profile/exec-energy-profile.md`), the local config (`client-profile/energy-audit.local.md`), the run log (`client-profile/energy-audit.run-log.jsonl`), and the output report folder (per config) all resolve relative to this directory. Do NOT read or write these from the plugin's own install directory. Plugin-internal references (`references/atlas-energy-audit-methodology.md`, `references/sub-agent-extraction-prompt.md`, the build-automation-plan skill) use `../../` from this skill folder to mean plugin root.
 
 ### 0. Pre-flight
 
@@ -48,8 +48,13 @@ If the previous successful run was less than 14 days ago and the invocation is m
 1. Read `<workspace>/client-profile/exec-energy-profile.md`. If absent, halt:
    > "No energy profile found at `client-profile/exec-energy-profile.md`. Run `extract-energy-profile` first."
 
-2. Read `<workspace>/.claude/energy-audit.local.md`. If absent, halt:
-   > "No setup config found at `.claude/energy-audit.local.md`. Run `setup` first."
+2. Read `<workspace>/client-profile/energy-audit.local.md`. If absent, also check `<workspace>/.claude/energy-audit.local.md`. Two halt branches:
+
+   If the file exists ONLY at the legacy `.claude/` path:
+   > "Your energy-audit wiring config is at the old `.claude/` path and hasn't been migrated. Run `/energy-audit:setup` once — it will copy the file forward to `client-profile/` and pick up where you left off."
+
+   If neither path has the file:
+   > "No setup config found at `client-profile/energy-audit.local.md`. Run `setup` first."
 
 3. For each source block present in the config (`calendar`, `tasks`, `meetings`, `slack`), verify the corresponding capability is still callable in the host's loaded tool list (re-detection per the `setup` skill's pattern). If any connected source has lost its tool, halt:
    > "The audit is set up to read from [source] but I can't find a connected [source] tool in your AI right now. Run `setup` to refresh the wiring."
@@ -60,7 +65,7 @@ If the previous successful run was less than 14 days ago and the invocation is m
 
 ### 1. Determine audit window — overlap-aware
 
-Read the most recent successful run from `<workspace>/.claude/energy-audit.run-log.jsonl` (last line; if file absent or empty, treat as no prior run).
+Read the most recent successful run from `<workspace>/client-profile/energy-audit.run-log.jsonl` (last line; if file absent or empty, treat as no prior run). Do NOT consult the legacy `<workspace>/.claude/energy-audit.run-log.jsonl` — old entries are not migrated; overlap detection effectively resets at the new path.
 
 Branch:
 
@@ -377,7 +382,7 @@ In dry-run mode, print the body and the report path to terminal but do NOT send.
 
 ### 13. Persist run log
 
-Append a one-line JSON entry to `<workspace>/.claude/energy-audit.run-log.jsonl`:
+Append a one-line JSON entry to `<workspace>/client-profile/energy-audit.run-log.jsonl` (create the file and the `client-profile/` directory if missing):
 
 ```json
 {"timestamp":"<ISO 8601>","window_start":"<YYYY-MM-DD>","window_end":"<YYYY-MM-DD>","mode":"<full|short_window>","sources_used":["calendar","tasks"],"candidates_evaluated":42,"candidates_passed":3,"plans_generated":2,"channel":"gmail","send_success":true,"dry_run":false}
@@ -398,8 +403,8 @@ In dry-run mode: terminal output of the report content, the notification body th
 - **Audit window override** — pass `--window-start` and `--window-end` skill arguments to override the trailing-14-day default. Skips Step 1's overlap detection entirely. Mode is set to `full` regardless of gap.
 - **Sub-agent prompt** — the meetings + Slack extraction prompt lives in `references/sub-agent-extraction-prompt.md`. Edit there to change extraction behavior; the skill body stays stable.
 - **Methodology** — readiness criteria, ranking weights, signals-breakdown rules, short-window-mode rule, and report structure all live in `references/atlas-energy-audit-methodology.md`. Edit there to fork the methodology; the skill body stays stable.
-- **Output path** — `output_folder` field in `.claude/energy-audit.local.md` (written by `setup`).
-- **Profile path** — `profile_path` field in `.claude/energy-audit.local.md` (defaults to `client-profile/exec-energy-profile.md`).
+- **Output path** — `output_folder` field in `client-profile/energy-audit.local.md` (written by `setup`).
+- **Profile path** — `profile_path` field in `client-profile/energy-audit.local.md` (defaults to `client-profile/exec-energy-profile.md`).
 - **Dry run** — `dry_run: true` in config, OR `--dry-run` skill argument.
 
 ## Why opinionated
