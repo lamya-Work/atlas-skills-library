@@ -11,7 +11,7 @@ Captures the four content fields the audit reads — Zone of Genius, drains, rec
 
 ## Purpose
 
-The `energy-audit` skill needs the executive's energy profile to filter and rank automation candidates. This skill captures that profile in a single canonical document. It's deliberately content-only — wiring (calendar / task tool / meetings / Slack / notification) lives in `.claude/energy-audit.local.md`, written by `setup`.
+The `energy-audit` skill needs the executive's energy profile to filter and rank automation candidates. This skill captures that profile in a single canonical document. It's deliberately content-only — wiring (calendar / task tool / meetings / Slack / notification) lives in `client-profile/energy-audit.local.md`, written by `setup`.
 
 The four content fields:
 
@@ -44,7 +44,13 @@ The skill is opinionated about staying short. Four questions, free-form answers,
 
 ### 0. Soft precondition check
 
-Look for `<workspace>/.claude/energy-audit.local.md`. If absent, surface this soft warning:
+Look for `<workspace>/client-profile/energy-audit.local.md`. If absent, also check `<workspace>/.claude/energy-audit.local.md`. Two branches:
+
+If the file exists ONLY at the legacy `.claude/` path:
+
+> "Your energy-audit wiring config is at the old `.claude/` path and hasn't been migrated to `client-profile/`. Run `/energy-audit:setup` once — it will copy the file forward and pick up where you left off. You can keep going here without setup if you'd rather, but the audit won't run until the config is migrated."
+
+If neither path has the file:
 
 > "Heads up — `setup` hasn't run yet, so I don't know which tools you've connected. You can keep going with this and connect tools later, or run `setup` first. What do you want to do?"
 
@@ -145,7 +151,7 @@ In refresh mode, prefix the hand-off with "Updated."
 - The four onboarding questions live in `references/onboarding-questions.md`. Change the question wording there; the skill body's flow stays stable.
 - The profile template at `../../client-profile/templates/exec-energy-profile.template.md` defines the section structure. Change the structure there.
 - The resume marker filename is fixed (`.energy-profile-in-progress.json`).
-- The profile path is fixed (`client-profile/exec-energy-profile.md`) so the audit can find it deterministically. To override, edit the `profile_path` field in `.claude/energy-audit.local.md` (written by `setup`).
+- The profile path is fixed (`client-profile/exec-energy-profile.md`) so the audit can find it deterministically. To override, edit the `profile_path` field in `client-profile/energy-audit.local.md` (written by `setup`).
 
 ## Why opinionated
 
