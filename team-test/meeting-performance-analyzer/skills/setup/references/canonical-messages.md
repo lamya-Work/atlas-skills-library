@@ -91,7 +91,7 @@ This file holds the verbatim wording of every multi-line message the setup wizar
 
 ## Hand-off
 
-> "Setup is complete. Saved to `.claude/meeting-performance-analyzer.local.md`.
+> "Setup is complete. Saved to `client-profile/meeting-performance-analyzer.local.md`.
 >
 > Next:
 > 1. Run `extract-meeting-preferences` once to capture the executive's known opinions about recurring meetings (non-negotiables, already-flagged-to-cut, restricted types).

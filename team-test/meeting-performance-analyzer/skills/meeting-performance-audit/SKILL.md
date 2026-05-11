@@ -11,7 +11,7 @@ The weekly run. Reads the local config and preferences file, computes the audit 
 
 ## Inputs
 
-- **Local config** at `<workspace>/.claude/meeting-performance-analyzer.local.md` — written by `setup`. Required.
+- **Local config** at `<workspace>/client-profile/meeting-performance-analyzer.local.md` — written by `setup`. Required.
 - **Preferences file** at `<workspace>/client-profile/meeting-performance-analyzer-preferences.md` — written by `extract-meeting-preferences`. Required.
 - **Last-run marker** at `<workspace>/.meeting-performance-analyzer-last-run.json` — read by this skill at start, written at end of a successful run. Optional on first run.
 - **Host's loaded tool list** — required. The skill calls the configured meeting-tool and email tools.
@@ -39,7 +39,7 @@ The weekly run. Reads the local config and preferences file, computes the audit 
 
 **Resolve all input paths against the workspace, NOT the plugin install directory.**
 
-1. Read `<workspace>/.claude/meeting-performance-analyzer.local.md`. If absent → halt with: *"No setup config found. Run `setup` first."*
+1. Read `<workspace>/client-profile/meeting-performance-analyzer.local.md`. If absent → halt with: *"No setup config found. Run `setup` first."*
 2. Read `<workspace>/client-profile/meeting-performance-analyzer-preferences.md`. If absent → halt with: *"No meeting preferences found. Run `extract-meeting-preferences` first."*
 3. Read `<workspace>/.meeting-performance-analyzer-last-run.json` if present. Schema:
 
