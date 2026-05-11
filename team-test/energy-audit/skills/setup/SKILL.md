@@ -419,7 +419,7 @@ Load and show the **Hand-off** section from `references/canonical-messages.md`.
 
 ## Refresh mode (alternative entry from Step 0)
 
-If config already exists at `client-profile/energy-audit.local.md` AND at least one source is connected AND notification is connected, skip Steps 1–2 (no Composio install walk-through) and run refresh mode instead.
+If config already exists at `<workspace>/client-profile/energy-audit.local.md` AND at least one source is connected AND notification is connected, skip Steps 1–2 (no Composio install walk-through) and run refresh mode instead.
 
 For each field in the existing config, show the current value and ask: *"Keep this, or change?"* Accept the answer per-field. If the user says change, ask the corresponding question for that field and run the relevant logic (re-pick provider, re-verify accounts, change channel or recipient, change output folder).
 
