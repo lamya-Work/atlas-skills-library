@@ -2,5 +2,8 @@
   "name": "meeting-performance-analyzer",
   "version": "0.1.0",
   "description": "Weekly meeting performance brief: pulls the past 7 days of meeting transcripts, scores each on quality dimensions, applies the Atlas Meeting Worth Matrix to recurring meetings, and produces a tight brief with leadership reflection and time-reclaimable recommendations.",
+  "author": {
+    "name": "Atlas Assistants"
+  },
   "tags": ["atlas", "meetings", "executive-assistant", "automation-readiness"]
 }
