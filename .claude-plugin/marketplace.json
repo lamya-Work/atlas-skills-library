@@ -74,6 +74,20 @@
       "description": "Extract an executive's ideal week from conversation, then scan their calendar to enforce it.",
       "version": "0.1.0",
       "tags": ["calendar", "productivity", "executive", "planning", "ideal-week"]
+    },
+    {
+      "name": "energy-audit",
+      "source": "./plugins/energy-audit",
+      "description": "Bi-weekly energy audit — reads the trailing 14 days across calendar, tasks, meetings, and Slack, applies automation-readiness criteria filtered through an exec's energy profile, and produces 1-2 automation plans per cycle.",
+      "version": "0.1.0",
+      "tags": ["executive", "energy-audit", "automation", "bi-weekly", "productivity"]
+    },
+    {
+      "name": "meeting-performance-analyzer",
+      "source": "./plugins/meeting-performance-analyzer",
+      "description": "Weekly meeting performance brief — scores meetings on quality dimensions, applies the Atlas Meeting Worth Matrix to recurring meetings, and produces a tight brief with leadership reflection and time-reclaimable recommendations.",
+      "version": "0.1.0",
+      "tags": ["meetings", "executive-assistant", "automation-readiness", "weekly", "productivity"]
     }
   ]
 }
