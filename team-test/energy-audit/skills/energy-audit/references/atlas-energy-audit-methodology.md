@@ -140,7 +140,7 @@ The audit reads up to four data sources — calendar, task tool, meeting transcr
 
 ### When sources are missing
 
-If a source isn't connected, its block is omitted from `.claude/energy-audit.local.md` and the audit skips it. The signals breakdown adapts — only connected sources show up. There is no minimum source count for a "valid" audit beyond the at-least-one requirement enforced at setup.
+If a source isn't connected, its block is omitted from `client-profile/energy-audit.local.md` and the audit skips it. The signals breakdown adapts — only connected sources show up. There is no minimum source count for a "valid" audit beyond the at-least-one requirement enforced at setup.
 
 ## The quarter-staleness flag
 
