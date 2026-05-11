@@ -30,3 +30,9 @@ __pycache__/
 **/client-profile/inbox-audit.md
 **/client-profile/label-plan.json
 **/logs/
+
+# meeting-performance-analyzer runtime state
+**/client-profile/meeting-performance-analyzer.local.md
+**/client-profile/meeting-performance-analyzer-preferences.md
+**/.meeting-performance-analyzer-last-run.json
+**/.meeting-performance-analyzer-onboarding-in-progress.json
