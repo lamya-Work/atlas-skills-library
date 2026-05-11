@@ -1,6 +1,6 @@
-# meeting-preferences.md template
+# meeting-performance-analyzer-preferences.md template
 
-The canonical shape of `client-profile/meeting-preferences.md`. Used as a reference when the SKILL writes the file at Step 3 and as documentation when a user wants to hand-edit the file.
+The canonical shape of `client-profile/meeting-performance-analyzer-preferences.md`. Used as a reference when the SKILL writes the file at Step 3 and as documentation when a user wants to hand-edit the file.
 
 ```yaml
 ---

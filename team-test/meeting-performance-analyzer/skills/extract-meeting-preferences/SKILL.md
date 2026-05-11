@@ -1,7 +1,7 @@
 ---
 name: extract-meeting-preferences
 description: Captures the executive's known opinions about recurring meetings into a single canonical preferences file. Three fields — non-negotiables (always PROTECT), already-flagged-to-cut (skip the verdict), and restricted types (excluded from the brief entirely). Doc-upload-first — if the user provides a meeting-prefs doc, read it for the three fields and only ask for what's missing. Resumable. Re-runnable to refresh any field.
-when_to_use: Run once after `setup`, and any time the executive's opinions about their recurring meetings change. Trigger phrases — "extract meeting preferences", "capture meeting preferences", "refresh meeting preferences", "update meeting prefs". Auto-trigger when `meeting-performance-audit` reports no preferences file exists at `client-profile/meeting-preferences.md`.
+when_to_use: Run once after `setup`, and any time the executive's opinions about their recurring meetings change. Trigger phrases — "extract meeting preferences", "capture meeting preferences", "refresh meeting preferences", "update meeting prefs". Auto-trigger when `meeting-performance-audit` reports no preferences file exists at `client-profile/meeting-performance-analyzer-preferences.md`.
 atlas_methodology: opinionated
 ---
 
@@ -19,7 +19,7 @@ Without this file, the audit would have to ask the executive's opinion on every 
 
 ## Inputs
 
-- **Existing preferences file** (optional) — if `<workspace>/client-profile/meeting-preferences.md` exists, the skill enters refresh mode automatically.
+- **Existing preferences file** (optional) — if `<workspace>/client-profile/meeting-performance-analyzer-preferences.md` exists, the skill enters refresh mode automatically.
 - **Optional uploaded doc** — the user can paste or attach a doc that already enumerates their non-negotiables, planned cuts, and restricted types. The skill parses it for the three fields and only asks the user for what's missing.
 - **Conversational interview** — questions asked one at a time when fields are not covered by an uploaded doc.
 
@@ -31,15 +31,15 @@ Without this file, the audit would have to ask the executive's opinion on every 
 
 ## Steps
 
-> **Note on "workspace".** "Workspace" = the user's current working directory at the time the skill is invoked. The preferences file (`client-profile/meeting-preferences.md`) resolves relative to this directory. Do NOT write into the plugin's own install directory.
+> **Note on "workspace".** "Workspace" = the user's current working directory at the time the skill is invoked. The preferences file (`client-profile/meeting-performance-analyzer-preferences.md`) resolves relative to this directory. Do NOT write into the plugin's own install directory.
 
 ### 0. Detection (always first)
 
-**Resolve `client-profile/meeting-preferences.md` against the workspace, NOT the plugin install directory.**
+**Resolve `client-profile/meeting-performance-analyzer-preferences.md` against the workspace, NOT the plugin install directory.**
 
 Two checks:
 
-1. **Existing preferences file** at `<workspace>/client-profile/meeting-preferences.md`.
+1. **Existing preferences file** at `<workspace>/client-profile/meeting-performance-analyzer-preferences.md`.
 2. **Optional uploaded doc** — if the user pasted/attached a meeting-prefs doc when invoking this skill, capture it for parsing in Step 1.
 
 Branch:
@@ -99,9 +99,9 @@ Capture each answer as a list (or empty list if skipped). Paraphrase back for co
 
 ---
 
-### 3. Write `client-profile/meeting-preferences.md`
+### 3. Write `client-profile/meeting-performance-analyzer-preferences.md`
 
-Write the captured values to `<workspace>/client-profile/meeting-preferences.md`. Format (YAML frontmatter, no markdown body):
+Write the captured values to `<workspace>/client-profile/meeting-performance-analyzer-preferences.md`. Format (YAML frontmatter, no markdown body):
 
 ```yaml
 ---
@@ -125,7 +125,7 @@ If a field is empty, write the key with an empty list (`non_negotiables: []`) �
 
 ### Refresh mode (alternative entry from Step 0)
 
-If `client-profile/meeting-preferences.md` already exists, load the current values and walk through them per-field:
+If `client-profile/meeting-performance-analyzer-preferences.md` already exists, load the current values and walk through them per-field:
 
 > "Current non-negotiables:
 > - [list]
@@ -136,7 +136,7 @@ Repeat for `already_flagged_to_cut` and `restricted_types`. Save the updated fil
 
 ## Output
 
-A `client-profile/meeting-preferences.md` file with the three fields. The audit reads this file at its start and enforces the rules.
+A `client-profile/meeting-performance-analyzer-preferences.md` file with the three fields. The audit reads this file at its start and enforces the rules.
 
 ## Customization
 
