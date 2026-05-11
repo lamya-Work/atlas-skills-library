@@ -1,7 +1,7 @@
 ---
 name: setup
 description: One-time onboarding wizard for the meeting-performance-analyzer plugin. Detects whether the host's AI has the capabilities the audit needs (meeting-tool read, email send) connected. Walks the user through Composio setup if they're missing — including the full first-time install flow (sign up at composio.dev → connect apps → install for AI host). Captures which meeting tool to use, which email account to send the notification from, the executive's name and optional email (used to attribute leadership observations in the audit), and the output folder for briefs. Resumable mid-flow. Re-runnable to refresh any field.
-when_to_use: Run before using `extract-meeting-preferences` or `meeting-performance-audit` for the first time. Trigger phrases — "set up meeting performance analyzer", "configure meeting analyzer", "connect meeting analyzer", "refresh meeting analyzer setup", "redo meeting analyzer setup". Auto-trigger when `meeting-performance-audit` reports no config exists at `client-profile/meeting-performance-analyzer.local.md`.
+when_to_use: Run before using `extract-meeting-preferences` or `meeting-performance-audit` for the first time. Trigger phrases — "set up meeting performance analyzer", "configure meeting analyzer", "connect meeting analyzer", "refresh meeting analyzer setup", "redo meeting analyzer setup". Auto-trigger when `meeting-performance-audit` reports no config exists at `<workspace>/client-profile/meeting-performance-analyzer.local.md`.
 atlas_methodology: neutral
 ---
 
@@ -11,13 +11,13 @@ Onboarding wizard for `meeting-performance-analyzer`. Detection-first: figures o
 
 ## Purpose
 
-The work skills (`extract-meeting-preferences` and `meeting-performance-audit`) need two capabilities connected: meeting-tool read (to pull transcripts and metadata) and email send (to deliver the audit-complete heads-up). This skill captures the wiring choice, account selection, executive identity, and output folder. Saves to `client-profile/meeting-performance-analyzer.local.md` in the workspace. Resumable. Re-runnable.
+The work skills (`extract-meeting-preferences` and `meeting-performance-audit`) need two capabilities connected: meeting-tool read (to pull transcripts and metadata) and email send (to deliver the audit-complete heads-up). This skill captures the wiring choice, account selection, executive identity, and output folder. Saves to `<workspace>/client-profile/meeting-performance-analyzer.local.md`. Resumable. Re-runnable.
 
 The audit's weekly cadence is encoded in its own design (7-day cap window). This skill does NOT capture a schedule anchor — recurring runs are wired in whichever scheduler the user's AI host provides (Cowork's scheduler, Claude Code's `/schedule`, GitHub Actions, OS cron, etc.). The Hand-off message surfaces this as a recommendation.
 
 ## Inputs
 
-- **Existing config** (optional) — if `client-profile/meeting-performance-analyzer.local.md` exists, the skill enters refresh mode automatically.
+- **Existing config** (optional) — if `<workspace>/client-profile/meeting-performance-analyzer.local.md` exists, the skill enters refresh mode automatically.
 - **Host's loaded tool list** — required. Skill reads what tools the host has connected and uses that to detect capability presence.
 - **In-progress marker** (optional) — `.meeting-performance-analyzer-onboarding-in-progress.json` in the workspace, if a previous run was interrupted.
 - **Conversational interview** — questions asked one at a time, paraphrased back for confirmation.
@@ -32,7 +32,7 @@ The audit's weekly cadence is encoded in its own design (7-day cap window). This
 
 ## Steps
 
-> **Note on "workspace".** "Workspace" = the user's current working directory at the time the skill is invoked. The local config (`client-profile/meeting-performance-analyzer.local.md`) and in-progress marker (`.meeting-performance-analyzer-onboarding-in-progress.json`) resolve relative to this directory. Do NOT write these into the plugin's own install directory. Plugin-internal references (`references/canonical-messages.md`) use the skill folder's own `references/` subdirectory.
+> **Note on "workspace".** "Workspace" = the user's current working directory at the time the skill is invoked. The local config (`<workspace>/client-profile/meeting-performance-analyzer.local.md`) and in-progress marker (`<workspace>/.meeting-performance-analyzer-onboarding-in-progress.json`) resolve relative to this directory. Do NOT write these into the plugin's own install directory. Plugin-internal references (`references/canonical-messages.md`) use the skill folder's own `references/` subdirectory.
 >
 > **Note on detecting capabilities.** Detection uses two patterns depending on how the user connected their tools.
 >
@@ -79,7 +79,7 @@ The audit's weekly cadence is encoded in its own design (7-day cap window). This
 
 ### 0. Detection (always first)
 
-**Resolve `client-profile/meeting-performance-analyzer.local.md` against the workspace (user's CWD), NOT the plugin install directory. If the path doesn't exist in the workspace, do NOT fall back to checking the plugin's own folder.**
+**Resolve `<workspace>/client-profile/meeting-performance-analyzer.local.md` against the workspace (user's CWD), NOT the plugin install directory. If the path doesn't exist in the workspace, do NOT fall back to checking the plugin's own folder.**
 
 Three checks:
 
@@ -248,7 +248,7 @@ Save running state to `.meeting-performance-analyzer-onboarding-in-progress.json
 
 ---
 
-### 7. Write `client-profile/meeting-performance-analyzer.local.md`
+### 7. Write `<workspace>/client-profile/meeting-performance-analyzer.local.md`
 
 Write the captured running state to `<workspace>/client-profile/meeting-performance-analyzer.local.md`. Format (YAML frontmatter, no markdown body):
 
@@ -289,7 +289,7 @@ Load and show the **Hand-off** section from `references/canonical-messages.md`.
 
 ### Refresh mode (alternative entry from Step 0)
 
-If config already exists at `client-profile/meeting-performance-analyzer.local.md` AND capabilities are connected, skip Steps 1–2 (no Composio install walk-through) and run refresh mode instead.
+If config already exists at `<workspace>/client-profile/meeting-performance-analyzer.local.md` AND capabilities are connected, skip Steps 1–2 (no Composio install walk-through) and run refresh mode instead.
 
 For each field in the existing config, show the current value and ask: *"Keep this, or change?"* Accept the answer per-field. If the user says change, ask the corresponding question for that field.
 
@@ -299,7 +299,7 @@ After the walk-through, fall through to Step 7 (write config — overwriting wit
 
 ## Output
 
-A `client-profile/meeting-performance-analyzer.local.md` file with the user's wiring choices. The work skills (`extract-meeting-preferences`, `meeting-performance-audit`) read this file at their start.
+A `<workspace>/client-profile/meeting-performance-analyzer.local.md` file with the user's wiring choices. The work skills (`extract-meeting-preferences`, `meeting-performance-audit`) read this file at their start.
 
 ## Customization
 
