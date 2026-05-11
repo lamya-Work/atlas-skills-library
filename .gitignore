@@ -29,4 +29,6 @@ __pycache__/
 **/client-profile/inbox-audit.json
 **/client-profile/inbox-audit.md
 **/client-profile/label-plan.json
+**/client-profile/energy-audit.local.md
+**/client-profile/energy-audit.run-log.jsonl
 **/logs/

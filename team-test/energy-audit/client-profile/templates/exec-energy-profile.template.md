@@ -1,6 +1,6 @@
 # Exec Energy Profile
 
-> This template is read by `extract-energy-profile`. The audit reads the saved profile from `client-profile/exec-energy-profile.md` (workspace-relative). For wiring (calendar / task / meetings / Slack / notification), see `.claude/energy-audit.local.md`.
+> This template is read by `extract-energy-profile`. The audit reads the saved profile from `client-profile/exec-energy-profile.md` (workspace-relative). For wiring (calendar / task / meetings / Slack / notification), see `client-profile/energy-audit.local.md`.
 
 ## Zone of Genius
 

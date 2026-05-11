@@ -1,7 +1,7 @@
 ---
 name: setup
 description: One-time onboarding wizard for the energy-audit plugin. Detects whether the host's AI has the capabilities the audit needs (calendar read / task read / meetings read / Slack read / notification email send) connected. Walks the user through Composio setup if any are missing. Captures which sources to use, which Slack channels to read, where meeting transcripts live, the notification email channel + recipient, and the output folder for reports. Resumable mid-flow. Re-runnable to refresh any field.
-when_to_use: Run before using `extract-energy-profile` or `energy-audit` for the first time. Trigger phrases — "set up energy audit", "configure energy audit", "wire energy audit setup", "refresh energy audit setup", "redo energy audit wiring". Auto-trigger when `energy-audit` reports no config exists at `.claude/energy-audit.local.md`.
+when_to_use: Run before using `extract-energy-profile` or `energy-audit` for the first time. Trigger phrases — "set up energy audit", "configure energy audit", "wire energy audit setup", "refresh energy audit setup", "redo energy audit wiring". Auto-trigger when `energy-audit` reports no config exists at `client-profile/energy-audit.local.md`.
 atlas_methodology: neutral
 ---
 
@@ -11,13 +11,13 @@ Onboarding wizard for `energy-audit`. Detection-first: figures out what the user
 
 ## Purpose
 
-The work skills (`extract-energy-profile` and `energy-audit`) need at least one of four data-source capabilities connected — calendar read, task tool read, meetings read, or Slack read — plus a notification-email path (Gmail or Outlook) for the audit-complete heads-up. This skill captures which sources to use, the per-source details (Slack channel list, meetings location, calendar accounts), the notification channel + recipient, and the output folder for reports. Saves to `.claude/energy-audit.local.md`. Resumable. Re-runnable.
+The work skills (`extract-energy-profile` and `energy-audit`) need at least one of four data-source capabilities connected — calendar read, task tool read, meetings read, or Slack read — plus a notification-email path (Gmail or Outlook) for the audit-complete heads-up. This skill captures which sources to use, the per-source details (Slack channel list, meetings location, calendar accounts), the notification channel + recipient, and the output folder for reports. Saves to `client-profile/energy-audit.local.md`. Resumable. Re-runnable.
 
 The audit's bi-weekly cadence is encoded in its own design (14-day window). This skill does NOT capture a schedule anchor — recurring runs are wired in whichever scheduler the user's AI host provides (Cowork's scheduler, Claude Code's `/schedule`, GitHub Actions, OS cron, etc.). The Hand-off message surfaces this as a recommendation.
 
 ## Inputs
 
-- **Existing config** (optional) — if `.claude/energy-audit.local.md` exists, the skill enters refresh mode automatically.
+- **Existing config** (optional) — if `client-profile/energy-audit.local.md` exists (or only the legacy `.claude/energy-audit.local.md` exists), the skill enters refresh mode automatically. See Step 0 for the legacy-path migration behavior.
 - **Host's loaded tool list** — required. Skill reads what tools the host has connected and uses that to detect capability presence.
 - **In-progress marker** (optional) — `.energy-audit-onboarding-in-progress.json` in the workspace, if a previous run was interrupted.
 - **Conversational interview** — questions asked one at a time, paraphrased back for confirmation.
@@ -32,7 +32,7 @@ The audit's bi-weekly cadence is encoded in its own design (14-day window). This
 
 ## Steps
 
-> **Note on "workspace".** "Workspace" = the user's current working directory at the time the skill is invoked. The local config (`.claude/energy-audit.local.md`) and in-progress marker (`.energy-audit-onboarding-in-progress.json`) resolve relative to this directory. Do NOT write these into the plugin's own install directory. Plugin-internal references (templates, methodology files, `references/canonical-messages.md`) use `../../` from this skill folder to mean plugin root.
+> **Note on "workspace".** "Workspace" = the user's current working directory at the time the skill is invoked. The local config (`client-profile/energy-audit.local.md`), the run log (`client-profile/energy-audit.run-log.jsonl`), and the in-progress marker (`.energy-audit-onboarding-in-progress.json`) resolve relative to this directory. Do NOT write these into the plugin's own install directory. Plugin-internal references (templates, methodology files, `references/canonical-messages.md`) use `../../` from this skill folder to mean plugin root.
 >
 > **Note on detecting capabilities.** Detection uses two patterns depending on how the user connected their tools.
 >
@@ -86,11 +86,26 @@ The audit's bi-weekly cadence is encoded in its own design (14-day window). This
 
 ### 0. Detection (always first)
 
-**Resolve `.claude/energy-audit.local.md` against the workspace (user's CWD), NOT the plugin install directory. If the path doesn't exist in the workspace, do NOT fall back to checking the plugin's own folder.**
+**Resolve all workspace paths in this step against the user's CWD, NOT the plugin install directory. If a path doesn't exist in the workspace, do NOT fall back to checking the plugin's own folder.**
 
-Three checks:
+**Legacy-path migration (run before the three checks below).**
 
-1. **Existing config** at `<workspace>/.claude/energy-audit.local.md`.
+If `<workspace>/client-profile/energy-audit.local.md` does NOT exist but `<workspace>/.claude/energy-audit.local.md` DOES exist:
+1. Read the contents of `<workspace>/.claude/energy-audit.local.md` verbatim.
+2. Create `<workspace>/client-profile/` if it does not already exist.
+3. Write the contents to `<workspace>/client-profile/energy-audit.local.md`.
+4. Do NOT delete the old file. Leave `<workspace>/.claude/energy-audit.local.md` in place untouched.
+5. Surface this one-line note to the user (load from `references/canonical-messages.md` "Legacy-path migration" section):
+   > "Migrated your wiring config from `.claude/energy-audit.local.md` to `client-profile/energy-audit.local.md`. You can delete the old file once you've confirmed things work."
+6. Continue with the three checks below — the file now exists at the new path.
+
+If both old and new exist, the new path takes precedence and no migration runs.
+
+If neither exists, no migration runs; setup proceeds normally.
+
+**Three checks:**
+
+1. **Existing config** at `<workspace>/client-profile/energy-audit.local.md`.
 2. **Capabilities** in the host's loaded tool list, per the Pattern A + B detection above.
 3. **In-progress marker** `<workspace>/.energy-audit-onboarding-in-progress.json`.
 
@@ -321,9 +336,9 @@ Save as `output_folder`.
 
 ---
 
-### 7. Write `.claude/energy-audit.local.md`
+### 7. Write `client-profile/energy-audit.local.md`
 
-Write the captured running state to `<workspace>/.claude/energy-audit.local.md`. Format (YAML frontmatter only, no markdown body):
+Write the captured running state to `<workspace>/client-profile/energy-audit.local.md`. Create the `<workspace>/client-profile/` directory if it does not exist. Format (YAML frontmatter only, no markdown body):
 
 ````markdown
 ---
@@ -404,7 +419,7 @@ Load and show the **Hand-off** section from `references/canonical-messages.md`.
 
 ## Refresh mode (alternative entry from Step 0)
 
-If config already exists at `.claude/energy-audit.local.md` AND at least one source is connected AND notification is connected, skip Steps 1–2 (no Composio install walk-through) and run refresh mode instead.
+If config already exists at `<workspace>/client-profile/energy-audit.local.md` AND at least one source is connected AND notification is connected, skip Steps 1–2 (no Composio install walk-through) and run refresh mode instead.
 
 For each field in the existing config, show the current value and ask: *"Keep this, or change?"* Accept the answer per-field. If the user says change, ask the corresponding question for that field and run the relevant logic (re-pick provider, re-verify accounts, change channel or recipient, change output folder).
 
@@ -414,7 +429,7 @@ After the walk-through, fall through to Step 7 (write config — overwriting wit
 
 ## Output
 
-A `<workspace>/.claude/energy-audit.local.md` file with the user's source mix and wiring choices. The work skills (`extract-energy-profile`, `energy-audit`) read this file at their start.
+A `<workspace>/client-profile/energy-audit.local.md` file with the user's source mix and wiring choices. The work skills (`extract-energy-profile`, `energy-audit`) read this file at their start.
 
 In refresh mode, prefix the Hand-off message with "Updated."
 

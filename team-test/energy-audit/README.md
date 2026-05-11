@@ -67,7 +67,7 @@ After install, run `setup` to connect your tools and pick which sources the audi
 
 ## First-run setup
 
-1. **Run `setup`.** Detection-first onboarding — only walks you through what's missing. Captures which sources to use, your Slack channel list, where meeting transcripts live, your notification email channel and recipient, and your output folder. Saves to `.claude/energy-audit.local.md` in your workspace.
+1. **Run `setup`.** Detection-first onboarding — only walks you through what's missing. Captures which sources to use, your Slack channel list, where meeting transcripts live, your notification email channel and recipient, and your output folder. Saves to `client-profile/energy-audit.local.md` in your workspace.
 
 2. **Run `extract-energy-profile`.** Captures the executive's Zone of Genius, drains, recurring patterns, and quarterly priorities. If you already have a prefs doc, OKRs, or a "how I work" page, paste it and the skill drafts the profile from that — it only asks the questions the doc doesn't already answer. Saves to `client-profile/exec-energy-profile.md` in your workspace.
 
@@ -104,10 +104,10 @@ Produces a twelve-section automation plan from a candidate brief. Auto-invoked b
 
 ## Customization notes
 
-- **Source mix.** Configurable in `.claude/energy-audit.local.md` (written by `setup`). Each source block (`calendar`, `tasks`, `meetings`, `slack`) is omitted entirely if you don't want that source read.
+- **Source mix.** Configurable in `client-profile/energy-audit.local.md` (written by `setup`). Each source block (`calendar`, `tasks`, `meetings`, `slack`) is omitted entirely if you don't want that source read.
 - **Audit cadence.** Default is bi-weekly (every 14 days). The plugin does NOT register the recurrence — your AI host's scheduler does. Change the cadence in your scheduler. The methodology assumes a 14-day window; if you change to weekly or monthly, also adjust `references/atlas-energy-audit-methodology.md` to keep the framing consistent.
 - **Notification.** Gmail or Outlook only. Re-run `setup` (refresh mode) to change channel or recipient. Set `notification_channel: none` if you only want the report file written without an email ping.
-- **Output folder.** `output_folder` field in `.claude/energy-audit.local.md`. Default `audits/` (workspace-relative — keeps the report path clickable from chat). For a cross-project library, override to an absolute path like `~/Documents/Atlas/Energy-Audits/` — the trade-off is that chat-link previews won't open the report directly.
+- **Output folder.** `output_folder` field in `client-profile/energy-audit.local.md`. Default `audits/` (workspace-relative — keeps the report path clickable from chat). For a cross-project library, override to an absolute path like `~/Documents/Atlas/Energy-Audits/` — the trade-off is that chat-link previews won't open the report directly.
 - **Sub-agent extraction prompt.** The meetings and Slack sub-agent prompt template lives at `skills/energy-audit/references/sub-agent-extraction-prompt.md`. Edit there to change extraction behavior; the `energy-audit/SKILL.md` body stays stable.
 - **Methodology.** Readiness criteria, ranking weights, signals breakdown rules, short-window mode rule, and report structure all live at `skills/energy-audit/references/atlas-energy-audit-methodology.md`. Edit there to fork the methodology.
 - **Plan template.** The twelve-section automation plan structure lives at `skills/build-automation-plan/references/atlas-automation-plan-template.md`. Edit there to change plan section guidance.
@@ -138,13 +138,18 @@ Run `extract-energy-profile` first. The audit reads `<workspace>/client-profile/
 
 ---
 
+**You see a "Migrated your wiring config" message on setup, or a "config is at the old `.claude/` path" error on `extract-energy-profile` / `energy-audit`.**
+Earlier versions of energy-audit wrote the wiring config to `.claude/energy-audit.local.md`. The current version writes to `client-profile/energy-audit.local.md`. On the next `setup` run, the skill auto-migrates the file forward — copying contents to the new path and leaving the old file in place (non-destructive). If you see the error on a work skill, just run `/energy-audit:setup` once. You can delete `<workspace>/.claude/energy-audit.local.md` by hand once you've confirmed everything works. The legacy run log (`.claude/energy-audit.run-log.jsonl`) is NOT migrated — overlap detection starts fresh at the new path. Delete the legacy run log when convenient.
+
+---
+
 **Audit ran but produced zero plans.**
 Not necessarily a bug. The methodology rejects weak candidates. Check the report's signals breakdown section — if it shows healthy volume, the data may not have a clearly automatable pattern this period. If it shows low volume, your connected sources may not be capturing enough activity. Consider connecting more sources via `setup`.
 
 ---
 
 **Notifications aren't arriving.**
-Check `notification_channel` in `.claude/energy-audit.local.md`. If it's set to `none`, the audit completes silently — only the report file is written. If it's `gmail` or `outlook`, verify the email tool is connected by re-running `setup`. Slack is not supported as a notification channel — if you set one up with an older version, switch to Gmail or Outlook via `setup` refresh mode.
+Check `notification_channel` in `client-profile/energy-audit.local.md`. If it's set to `none`, the audit completes silently — only the report file is written. If it's `gmail` or `outlook`, verify the email tool is connected by re-running `setup`. Slack is not supported as a notification channel — if you set one up with an older version, switch to Gmail or Outlook via `setup` refresh mode.
 
 ---
 
