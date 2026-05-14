@@ -1,0 +1,9 @@
+{
+  "name": "daily-followup-tracker",
+  "version": "0.1.0",
+  "description": "Daily multi-channel follow-up sweep. Reads the last 24 hours across email, messaging, today's meetings, and the user's task system. Detects open loops the user owes (waiting on user reply) and today's-new commitments the user just made. Drafts the follow-up messages in the user's actual voice and produces a single daily report with drafts ready to copy-send.",
+  "author": {
+    "name": "Atlas Assistants"
+  },
+  "tags": ["executive", "follow-up", "daily", "email", "slack", "meetings", "tasks", "drafting", "productivity"]
+}

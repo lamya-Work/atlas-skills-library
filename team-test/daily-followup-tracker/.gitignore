@@ -1,0 +1,5 @@
+# Filled instances of templates — the templates themselves at templates/*.template.md ARE tracked.
+# These would only appear here if someone accidentally fills the template in-place.
+client-profile/daily-followup-tracker-voice.md
+client-profile/daily-followup-tracker.local.md
+.daily-followup-tracker-onboarding-in-progress.json
