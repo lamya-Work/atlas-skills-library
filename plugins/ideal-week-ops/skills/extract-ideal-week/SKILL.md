@@ -27,11 +27,18 @@ The scan skill can only flag what's been written down. This skill writes it down
 
 ### 0. Precondition check — has setup run?
 
-Before the interview, check whether `.claude/ideal-week-ops.local.md` exists in the workspace.
+Before the interview, check whether `<workspace>/client-profile/ideal-week-ops.local.md` exists. If absent, also check `<workspace>/.claude/ideal-week-ops.local.md`. Three branches:
 
-**If config exists**: proceed directly to the interview.
+**If the file exists at the new `client-profile/` path**: proceed directly to the interview.
 
-**If config is missing**: tell the user (soft, not blocking):
+**If the file exists ONLY at the legacy `.claude/` path**: tell the user (soft, not blocking):
+
+> "Your ideal-week-ops wiring config is at the old `.claude/` path and hasn't been migrated to `client-profile/`. Run `/ideal-week-ops:setup` once — it will copy the file forward and pick up where you left off. You can keep going with extraction here without the migration; the extracted ideal week saves either way, and the daily scan will run once the config is migrated."
+
+If user picks setup first → tell them to run `setup`, then return here.
+If user picks proceed anyway → continue to the interview.
+
+**If neither path has the file** (no setup ever): tell the user (soft, not blocking):
 
 > "Heads up — `setup` hasn't run yet. Most users wire their calendar + notification capabilities first, so the daily scan works after this. Two options:
 >
@@ -131,7 +138,7 @@ Next: run scan-ideal-week to do the first calendar scan, or wait for the next sc
 ## Customization
 
 - **Question set.** The 10 + 3 questions in `references/extraction-questions.md` are Atlas's standard. Add or remove for specific clients — but keep the count low. Long interviews produce shallow answers.
-- **Output location.** Default `client-profile/ideal-week.md`. Override in `.claude/ideal-week-ops.local.md`.
+- **Output location.** Default `client-profile/ideal-week.md`. Override in `client-profile/ideal-week-ops.local.md`.
 - **Resume marker.** `.extract-in-progress.json` filename is fixed — the skill looks for that exact name. Don't rename without updating the skill body.
 - **Save format.** Markdown with structured sections per `../../references/ideal-week-format.md`. The scan skill parses this format directly. If you change the format, you must also update the scan skill's parser.
 

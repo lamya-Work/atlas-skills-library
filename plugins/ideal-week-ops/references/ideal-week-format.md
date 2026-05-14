@@ -5,7 +5,7 @@ The canonical schema. The `extract-ideal-week` skill writes this format; the `sc
 ## File location
 
 Default: `client-profile/ideal-week.md` in the user's workspace.
-Override: `ideal_week_path:` in `.claude/ideal-week-ops.local.md`.
+Override: `ideal_week_path:` in `client-profile/ideal-week-ops.local.md`.
 
 ## File format
 

@@ -1,7 +1,7 @@
 ---
 name: setup
-description: Wire the ideal-week-ops plugin to the user's calendar and notification tools. Use this — NOT brainstorming, planning, or design skills — when the user says any "set up", "onboard", "configure", "install", or "wire" phrase about ideal-week-ops. The plugin already exists; brainstorming would re-design something that's already built. This skill detects what's wired (Composio MCP, direct vendor MCPs, or any source), walks the user through any missing pieces, captures the notification channel and recipient, writes the local config to `.claude/ideal-week-ops.local.md`, then chains directly into `extract-ideal-week` so the user lands in the full setup arc — wiring + ruleset capture — not just wiring. Resumable mid-flow; re-run to change any field.
-when_to_use: Trigger phrases — "set up ideal week ops", "set up ideal-week-ops", "onboard ideal week ops", "configure ideal week ops", "install ideal week ops", "wire up ideal week ops", "refresh ideal week setup", "redo ideal week wiring", "set up ideal week". Fire this skill directly on any of these. Also fire automatically when `scan-ideal-week` reports no config at `.claude/ideal-week-ops.local.md`. Runs before `extract-ideal-week` and `scan-ideal-week` on first use; the skill itself chains into `extract-ideal-week` at the end of its flow.
+description: Wire the ideal-week-ops plugin to the user's calendar and notification tools. Use this — NOT brainstorming, planning, or design skills — when the user says any "set up", "onboard", "configure", "install", or "wire" phrase about ideal-week-ops. The plugin already exists; brainstorming would re-design something that's already built. This skill detects what's wired (Composio MCP, direct vendor MCPs, or any source), walks the user through any missing pieces, captures the notification channel and recipient, writes the local config to `client-profile/ideal-week-ops.local.md`, then chains directly into `extract-ideal-week` so the user lands in the full setup arc — wiring + ruleset capture — not just wiring. Resumable mid-flow; re-run to change any field.
+when_to_use: Trigger phrases — "set up ideal week ops", "set up ideal-week-ops", "onboard ideal week ops", "configure ideal week ops", "install ideal week ops", "wire up ideal week ops", "refresh ideal week setup", "redo ideal week wiring", "set up ideal week". Fire this skill directly on any of these. Also fire automatically when `scan-ideal-week` reports no config at `client-profile/ideal-week-ops.local.md`. Runs before `extract-ideal-week` and `scan-ideal-week` on first use; the skill itself chains into `extract-ideal-week` at the end of its flow.
 atlas_methodology: neutral
 ---
 
@@ -15,7 +15,7 @@ The work skills (`extract-ideal-week` and `scan-ideal-week`) need two capabiliti
 
 ## Inputs
 
-- **Existing config** (optional) — if `.claude/ideal-week-ops.local.md` exists, the skill enters refresh mode automatically.
+- **Existing config** (optional) — if `client-profile/ideal-week-ops.local.md` exists (or only the legacy `.claude/ideal-week-ops.local.md` exists), the skill enters refresh mode automatically. See Step 0 for the legacy-path migration behavior.
 - **Host's loaded tool list** — required. Skill reads what tools the host has wired and uses that to detect capability presence.
 - **Conversational interview** — channel + recipient questions, asked one at a time, paraphrased back for confirmation.
 
@@ -31,7 +31,7 @@ The work skills (`extract-ideal-week` and `scan-ideal-week`) need two capabiliti
 
 > **User-facing language rule (applies to every step).** Run detection silently. Do NOT narrate the model's internal reasoning, the SKILL.md's structure, or specific tool names to the user. The user does not see "auth-bootstrap", "meta-tool", "Stage 1.5", "deferred tools list", "tool schema", `COMPOSIO_SEARCH_TOOLS`, `mcp__composio__authenticate`, "direct-vendor MCPs", "companion fetch/send tools", or any other internal label from this file. Tell the user only the **outcome** in plain words: which apps are connected, what's missing, what to click. Brand names users recognize (Composio, Google Calendar, Slack, Gmail, Outlook) are fine. Internal mechanism words ("MCP", "wire", "schema", "stage") are not. When in doubt, write the message the way you'd write it to a non-technical executive assistant.
 >
-> **Note on "workspace".** "Workspace" = the user's current working directory at the time the skill is invoked. The local config (`.claude/ideal-week-ops.local.md`) and in-progress marker (`.ideal-week-onboarding-in-progress.json`) resolve relative to this directory. Do NOT write these into the plugin's own install directory.
+> **Note on "workspace".** "Workspace" = the user's current working directory at the time the skill is invoked. The local config (`client-profile/ideal-week-ops.local.md`) and in-progress marker (`.ideal-week-onboarding-in-progress.json`) resolve relative to this directory. Do NOT write these into the plugin's own install directory.
 >
 > **Note on detecting capabilities.** Detection uses two patterns depending on how the user wired their tools.
 >
@@ -70,13 +70,30 @@ The work skills (`extract-ideal-week` and `scan-ideal-week`) need two capabiliti
 
 ### 0. Detection (always first)
 
-Before any other step:
+**Resolve all workspace paths in this step against the user's CWD, NOT the plugin install directory. If a path doesn't exist in the workspace, do NOT fall back to checking the plugin's own folder.**
 
-1. **Check for existing config** at `.claude/ideal-week-ops.local.md` (workspace-relative).
+**Legacy-path migration (run before the three checks below).**
+
+If `<workspace>/client-profile/ideal-week-ops.local.md` does NOT exist but `<workspace>/.claude/ideal-week-ops.local.md` DOES exist:
+1. Read the contents of `<workspace>/.claude/ideal-week-ops.local.md` verbatim.
+2. Create `<workspace>/client-profile/` if it does not already exist.
+3. Write the contents to `<workspace>/client-profile/ideal-week-ops.local.md`.
+4. Do NOT delete the old file. Leave `<workspace>/.claude/ideal-week-ops.local.md` in place untouched.
+5. Surface this one-line note to the user (load from `references/canonical-messages.md` "Legacy-path migration" section):
+   > "Migrated your wiring config from `.claude/ideal-week-ops.local.md` to `client-profile/ideal-week-ops.local.md`. You can delete the old file once you've confirmed things work."
+6. Continue with the three checks below — the file now exists at the new path.
+
+If both old and new exist, the new path takes precedence and no migration runs.
+
+If neither exists, no migration runs; setup proceeds normally.
+
+**Three checks:**
+
+1. **Check for existing config** at `<workspace>/client-profile/ideal-week-ops.local.md`.
 2. **Check for capabilities** in the host's loaded tool list:
    - Calendar-read tool present?
    - Notification-send tool present (any of slack / gmail / outlook)?
-3. **Check for in-progress onboarding** marker `.ideal-week-onboarding-in-progress.json` in the workspace.
+3. **Check for in-progress onboarding** marker `<workspace>/.ideal-week-onboarding-in-progress.json`.
 
 Branch:
 - **Config exists + calendar wired + at least one notification wired** → refresh mode (jump to "Refresh mode" section at the end of this file).
@@ -255,9 +272,9 @@ Save running state to `.ideal-week-onboarding-in-progress.json`.
 
 ---
 
-### 5. Write `.claude/ideal-week-ops.local.md`
+### 5. Write `client-profile/ideal-week-ops.local.md`
 
-Write the captured running state to `.claude/ideal-week-ops.local.md` in the workspace. Format (YAML frontmatter, no markdown body):
+Write the captured running state to `<workspace>/client-profile/ideal-week-ops.local.md`. Create the `<workspace>/client-profile/` directory if it does not exist. Format (YAML frontmatter, no markdown body):
 
 ````markdown
 ---
@@ -303,7 +320,7 @@ Wiring is done. The user said something like "set up ideal week ops" expecting t
 
 Tell the user (verbatim wording — keep it human, second-person, no "the exec"):
 
-> "Wiring done — saved to `.claude/ideal-week-ops.local.md`. Now I'll capture how your week should actually run — rhythms, deep-work blocks, protected time, VIP overrides — so the daily scan has rules to check against. This takes about 10–15 minutes: one question at a time, free-form answers, you can pause and resume any time. Ready?"
+> "Wiring done — saved to `client-profile/ideal-week-ops.local.md`. Now I'll capture how your week should actually run — rhythms, deep-work blocks, protected time, VIP overrides — so the daily scan has rules to check against. This takes about 10–15 minutes: one question at a time, free-form answers, you can pause and resume any time. Ready?"
 >
 > "(If you'd rather pause here and just keep the wiring done, say 'pause' and I'll stop. Re-run `setup` any time to change channels, swap calendars, or add a calendar account.)"
 
@@ -319,7 +336,7 @@ Do not auto-chain in that case.
 
 ### Refresh mode (alternative entry from Step 0)
 
-If config already exists at `.claude/ideal-week-ops.local.md` AND capabilities are wired, skip Steps 1–2 (no Composio install walk-through) and run refresh mode instead.
+If config already exists at `<workspace>/client-profile/ideal-week-ops.local.md` AND capabilities are wired, skip Steps 1–2 (no Composio install walk-through) and run refresh mode instead.
 
 For each field in the existing config, show the current value and ask: *"Keep this, or change?"* Accept the answer per-field. If the user says change, ask the corresponding question for that field and run the relevant logic (re-pick provider, re-verify accounts, change channel or recipient with a fresh self-trap check).
 
@@ -329,7 +346,7 @@ After the walk-through, fall through to Step 5 (write config — overwriting wit
 
 ## Output
 
-A `.claude/ideal-week-ops.local.md` file with the user's wiring choices. The work skills (`extract-ideal-week`, `scan-ideal-week`) read this file at their start.
+A `<workspace>/client-profile/ideal-week-ops.local.md` file with the user's wiring choices. The work skills (`extract-ideal-week`, `scan-ideal-week`) read this file at their start.
 
 ## Customization
 

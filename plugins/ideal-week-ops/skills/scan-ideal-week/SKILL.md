@@ -17,7 +17,7 @@ The exec's ideal week is enforceable only if something is checking the calendar 
 
 - **Target window** — default: `tomorrow` if invoked at or after 4pm; `today` otherwise (covers all hours from midnight through 4pm). Override with explicit dates if needed.
 - **Ideal week document** — read from `ideal_week_path` in the local config (default `client-profile/ideal-week.md`)
-- **Local config** — `.claude/ideal-week-ops.local.md` for paths, notification channel, scan window, severity overrides
+- **Local config** — `<workspace>/client-profile/ideal-week-ops.local.md` for paths, notification channel, scan window, severity overrides
 
 ## Required capabilities
 
@@ -30,7 +30,7 @@ The exec's ideal week is enforceable only if something is checking the calendar 
 
 ### 0. Precondition check — config required
 
-Before any other logic, check `.claude/ideal-week-ops.local.md` exists in the workspace AND contains the required fields.
+Before any other logic, check `<workspace>/client-profile/ideal-week-ops.local.md` exists AND contains the required fields. If absent, also check `<workspace>/.claude/ideal-week-ops.local.md` (legacy path — see hard-fail branches below).
 
 **Required fields:**
 - `calendar_accounts` (non-empty list)
@@ -39,9 +39,13 @@ Before any other logic, check `.claude/ideal-week-ops.local.md` exists in the wo
 - `notification_target` (required only if `notification_channel` is not `none`; can be empty/absent otherwise)
 - `ideal_week_path` (non-empty string)
 
-**If config is missing or any required field is missing/empty**: HARD FAIL. Tell the user:
+**Hard-fail branches:**
 
-> "Cannot scan — `.claude/ideal-week-ops.local.md` is [missing | missing required field <name>]. Run `setup` first to wire calendar + notification, then re-run scan."
+If the file exists ONLY at the legacy `.claude/` path:
+> "Your ideal-week-ops wiring config is at the old `.claude/` path and hasn't been migrated. Run `/ideal-week-ops:setup` once — it will copy the file forward to `client-profile/` and pick up where you left off."
+
+If neither path has the file, or if the file at the new path is missing required fields:
+> "Cannot scan — `client-profile/ideal-week-ops.local.md` is [missing | missing required field <name>]. Run `setup` first to wire calendar + notification, then re-run scan."
 
 Do NOT attempt to use defaults or fall back. The user needs to know setup is the precondition; silent fallback masks the real issue.
 
@@ -56,7 +60,7 @@ After the precondition check passes:
 
 Use the available calendar tool to list events for the scan window.
 
-**Calendar accounts come from `.claude/ideal-week-ops.local.md`** (`calendar_accounts:` list). The format is `<provider>:<account-identifier>` — e.g., `googlecalendar:sam@atlas.co`.
+**Calendar accounts come from `client-profile/ideal-week-ops.local.md`** (`calendar_accounts:` list). The format is `<provider>:<account-identifier>` — e.g., `googlecalendar:sam@atlas.co`.
 
 **Window**:
 - If invocation time is at or after 4pm local: `scan_window_start = tomorrow 00:00`, `scan_window_end = tomorrow 23:59`
@@ -145,7 +149,7 @@ Write a per-day log file to `log_folder` from config. Use read-then-append safet
 
 **5b. Send the notification ping (only if `notification_channel` is not `none`).**
 
-Use the available notification tool. **Channel and recipient come from `.claude/ideal-week-ops.local.md`** (`notification_channel`, `notification_target`).
+Use the available notification tool. **Channel and recipient come from `client-profile/ideal-week-ops.local.md`** (`notification_channel`, `notification_target`).
 
 **Render format per channel:**
 
@@ -193,7 +197,7 @@ The order of sections in the file follows write order — the log file accumulat
 
 ### 6. Persist scan log
 
-Write a one-line log entry to `.claude/ideal-week-ops.scan-log.jsonl` with: timestamp, window, flag counts, channel, send-success. The log is for debugging "did the scan run?" — not for analytics.
+Write a one-line log entry to `<workspace>/client-profile/ideal-week-ops.scan-log.jsonl` (create the file and the `client-profile/` directory if missing) with: timestamp, window, flag counts, channel, send-success. The log is for debugging "did the scan run?" — not for analytics. Do NOT consult any legacy `<workspace>/.claude/ideal-week-ops.scan-log.jsonl` — old entries are not migrated; the scan log effectively starts fresh at the new path.
 
 ## Output
 

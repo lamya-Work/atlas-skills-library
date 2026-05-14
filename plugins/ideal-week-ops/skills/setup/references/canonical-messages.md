@@ -59,4 +59,12 @@ Used at: `SKILL.md` Step 0 / Step 1, when detection finds capabilities are missi
 
 ---
 
+### Legacy-path migration
+
+Used at: `SKILL.md` Step 0, only when an existing `.claude/ideal-week-ops.local.md` is detected and no new-path config exists. Surfaced once, after the file copy completes, before continuing into the three detection checks.
+
+> "Migrated your wiring config from `.claude/ideal-week-ops.local.md` to `client-profile/ideal-week-ops.local.md`. You can delete the old file once you've confirmed things work."
+
+---
+
 *These messages were adapted from the conference-contact-capture design phase. Drift is fine over time — but the starting point lives here so the careful tone work isn't lost on first implementation.*
